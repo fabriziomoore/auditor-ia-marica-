@@ -9,7 +9,7 @@ jobs:
   rodar-ia:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Garante a permissao para salvar arquivos no repositorio
+      contents: write # Permissao para salvar a planilha no repositorio
     steps:
       - name: Baixar o codigo do repositorio
         uses: actions/checkout@v4
@@ -25,6 +25,8 @@ jobs:
       - name: Executar o script do Auditor IA
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }} # Injeta o token guardado no segredo
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}   # Injeta o ID guardado no segredo
         run: python bot.py
 
       - name: Salvar planilha atualizada de volta no GitHub
