@@ -13,9 +13,8 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 
 def enviar_alerta_telegram(mensagem):
-    # Envia notificações em tempo real e de graça pelo Telegram
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("⚠️ Configurações do Telegram ausentes.")
+        print("⚠️ Configurações do Telegram ausentes nos Secrets.")
         return
 
     url = f"https://telegram.org{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -27,7 +26,13 @@ def enviar_alerta_telegram(mensagem):
     try:
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code == 200:
-            print("🚀 Notificação enviada para o Telegram!")
+            print("🚀 Notificação enviada para o Telegram com sucesso!")
+        else:
+            # ISSO VAI NOS DIZER O ERRO REAL:
+            print(
+                f"❌ O Telegram recusou a mensagem! Código: {response.status_code}"
+            )
+            print(f"📝 Resposta do servidor do Telegram: {response.text}")
     except Exception as e:
         print(f"❌ Erro de rede ao notificar Telegram: {e}")
 
@@ -39,13 +44,7 @@ def obter_dados_contingencia():
             "nomeRazaoSocialFornecedor": "Aliança Comercial de Alimentos Eireli",
             "objeto": "Fornecimento de gêneros alimentícios para a merenda escolar de Maricá.",
             "valorInicial": "1.890.000,00",
-        },
-        {
-            "numeroContrato": "032/2025",
-            "nomeRazaoSocialFornecedor": "Infrasane Saneamento e Construções Ltda",
-            "objeto": "Manutenção preventiva e corretiva das redes de águas pluviais e pavimentação de vias.",
-            "valorInicial": "5.450.000,00",
-        },
+        }
     ]
 
 
@@ -63,7 +62,6 @@ for c in contratos:
     objeto = c["objeto"]
     valor = c["valorInicial"]
 
-    # Prompt otimizado para o Gemini 2.5
     prompt = f"Você é um auditor fiscal. Analise em 2 linhas se R$ {valor} faz sentido para o serviço '{objeto}' da empresa '{fornecedor}'. Foco em riscos."
 
     try:
@@ -74,7 +72,6 @@ for c in contratos:
     except Exception as e:
         analise = f"Erro na IA: {str(e)}"
 
-    # Dispara o card formatado direto para o seu bolso
     texto_card = (
         f"📄 *Contrato nº:* {numero}\n"
         f"🏢 *Empresa:* {fornecedor}\n"
@@ -93,7 +90,6 @@ for c in contratos:
         }
     )
 
-# Cria e grava a planilha física na aba Code
 df_final = pd.DataFrame(resultados)
 df_final.to_csv("relatorio_diario_marica.csv", index=False, encoding="utf-8")
 print("🏆 Planilha gerada com sucesso!")
