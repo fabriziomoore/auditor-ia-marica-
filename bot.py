@@ -31,23 +31,18 @@ def obter_dados_contingencia():
 def raspar_portal_marica():
     print("🌐 Tentando acessar o Portal da Transparência de Maricá...")
     url = "https://marica.rj.gov.br"
-
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
     }
-
     try:
-        # Tenta conectar ao site do município com um tempo limite curto de 10 segundos
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
             tabela = soup.find("table") or soup.find(class_="table")
-
             if tabela:
                 contratos_descobertos = []
                 linhas = tabela.find_all("tr")
-
                 for linha in linhas[1:4]:
                     colunas = linha.find_all("td")
                     if len(colunas) >= 4:
@@ -58,14 +53,11 @@ def raspar_portal_marica():
                             "valorInicial": colunas[3].text.strip(),
                         }
                         contratos_descobertos.append(item)
-
                 if contratos_descobertos:
                     print("✅ Sucesso ao raspar dados ao vivo do portal!")
                     return contratos_descobertos
-    except Exception as e:
-        print(f"⚠️ Portal de Maricá recusou a conexão ou mudou a estrutura.")
-
-    # Se falhar ou der erro, o código não quebra e aciona o plano B automaticamente
+    except:
+        pass
     return obter_dados_contingencia()
 
 
@@ -104,14 +96,15 @@ for c in contratos:
     resultados.append(
         {
             "Data_Auditoria": datetime.date.today().strftime("%d/%m/%Y"),
-            "Contrato_Nº": numero,
+            "Contrato_N": numero,
             "Fornecedor": fornecedor,
-            "Valor_R$": valor,
+            "Valor_RS": valor,
             "Objeto_Completo": objeto,
             "Analise_Critica_IA": analise,
         }
     )
 
+# Cria e força a gravação correta do arquivo CSV
 df_final = pd.DataFrame(resultados)
-df_final.to_csv("relatorio_diario_marica.csv", index=False)
-print("🏆 Planilha histórica atualizada com sucesso!")
+df_final.to_csv("relatorio_diario_marica.csv", index=False, encoding="utf-8")
+print("🏆 Arquivo 'relatorio_diario_marica.csv' gravado no servidor local!")
