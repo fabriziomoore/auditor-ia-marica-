@@ -37,7 +37,7 @@ def raspar_portal_marica():
             # Varre as primeiras linhas de dados da tabela (pulando o cabeçalho)
             for linha in linhas[1:4]:
                 colunas = linha.find_all("td")
-                # Garante que a linha possui colunas suficientes para não quebrar o código
+                # CORREÇÃO: Garante que existem colunas e extrai usando os índices corretos [0, 1, 2, 3]
                 if len(colunas) >= 4:
                     item = {
                         "numeroContrato": colunas[0].text.strip(),
