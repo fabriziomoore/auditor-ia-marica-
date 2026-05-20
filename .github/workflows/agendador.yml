@@ -1,0 +1,34 @@
+name: Executar Auditoria de Marica Diario
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Executa de forma automatica todos os dias as 03h00 da manha
+  workflow_dispatch: # Permite que voce clique em um botao para rodar manualmente
+
+jobs:
+  rodar-ia:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o codigo do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar o ambiente Python
+        uses: actions/setup-python@v5
+        with:
+          python-python: '3.11'
+
+      - name: Instalar ferramentas necessarias
+        run: pip install google-genai pandas requests
+
+      - name: Executar o script do Auditor IA
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python bot.py
+
+      - name: Salvar planilha atualizada de volta no GitHub
+        run: |
+          git config --global user.name "Auditor Robot"
+          git config --global user.email "bot@github.com"
+          git add relatorio_diario_marica.csv
+          git commit -m "Planilha atualizada pela IA [Automático]" || exit 0
+          git push
