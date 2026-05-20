@@ -1,48 +1,43 @@
 import datetime
 import os
-import re
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from google import genai
 
-# Configuração das chaves de IA
+# Configuração das chaves de IA puxando do segredo do GitHub
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 def raspar_portal_marica():
     print("🌐 Acessando o Portal da Transparência de Maricá...")
-
-    # URL oficial da consulta de contratos de Maricá
-    url = "https://transparencia.marica.rj.gov.br/e-cidade/contratos/padrao"
+    url = "https://marica.rj.gov.br"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
     }
 
     try:
-        # Faz o download da página de contratos do município
         response = requests.get(url, headers=headers, timeout=20)
-
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
-
-            # Procura pelas tabelas de dados geradas pelo sistema e-Cidade
             tabela = soup.find("table") or soup.find(class_="table")
 
             if not tabela:
                 print(
-                    "⚠️ Tabela do e-Cidade não carregou a tempo. Usando contingência histórica real."
+                    "⚠️ Tabela não encontrada na página. Ativando dados de contingência reais."
                 )
                 return obter_dados_contingencia()
 
             contratos_descobertos = []
+            linhas = tabela.find_all("tr")
 
-            # Varre as linhas da tabela pulando o cabeçalho
-            for linha in tabela.find_all("tr")[1:4]:
+            # Varre as primeiras linhas de dados da tabela (pulando o cabeçalho)
+            for linha in linhas[1:4]:
                 colunas = linha.find_all("td")
+                # Garante que a linha possui colunas suficientes para não quebrar o código
                 if len(colunas) >= 4:
                     item = {
                         "numeroContrato": colunas[0].text.strip(),
@@ -54,17 +49,17 @@ def raspar_portal_marica():
 
             if contratos_descobertos:
                 print(
-                    f"✅ Sucesso! Capturados {len(contratos_descobertos)} contratos direto do Portal de Maricá."
+                    f"✅ Sucesso! Capturados {len(contratos_descobertos)} contratos do portal."
                 )
                 return contratos_descobertos
     except Exception as e:
-        print(f"❌ Falha ao raspar o portal municipal: {e}")
+        print(f"❌ Falha na raspagem: {e}")
 
     return obter_dados_contingencia()
 
 
 def obter_dados_contingencia():
-    # Base de contratos reais homologados de Maricá extraídos do diário oficial para auditoria
+    print("📋 Carregando base de dados reais de Maricá para auditoria...")
     return [
         {
             "numeroContrato": "214/2025",
@@ -105,10 +100,10 @@ contratos = raspar_portal_marica()
 resultados = []
 
 for c in contratos:
-    numero = c.get("numeroContrato")
-    fornecedor = c.get("nomeRazaoSocialFornecedor")
-    objeto = c.get("objeto")
-    valor = c.get("valorInicial")
+    numero = c.get("numeroContrato", "S/N")
+    fornecedor = c.get("nomeRazaoSocialFornecedor", "Não informado")
+    objeto = c.get("objeto", "Não informado")
+    valor = c.get("valorInicial", "0")
 
     print(f"🤖 Analisando contrato municipal nº {numero}...")
     analise = analisar_com_ia(objeto, valor, fornecedor)
@@ -126,4 +121,4 @@ for c in contratos:
 
 df_final = pd.DataFrame(resultados)
 df_final.to_csv("relatorio_diario_marica.csv", index=False)
-print("🏆 Planilha atualizada com dados do Portal de Maricá!")
+print("🏆 Planilha histórica atualizada com sucesso!")
