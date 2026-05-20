@@ -9,7 +9,9 @@ jobs:
   rodar-ia:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Garante via codigo a permissao de salvar o arquivo
+      contents: write # Permissao para salvar o arquivo de volta no repositorio
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Força o uso do Node24 e elimina o aviso amarelo
     steps:
       - name: Baixar o codigo do repositorio
         uses: actions/checkout@v4
@@ -17,7 +19,7 @@ jobs:
       - name: Configurar o ambiente Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Corrigido aqui de python-python para python-version
+          python-version: '3.11'
 
       - name: Instalar ferramentas necessarias
         run: pip install google-genai pandas requests
@@ -32,5 +34,5 @@ jobs:
           git config --global user.name "Auditor Robot"
           git config --global user.email "bot@github.com"
           git add relatorio_diario_marica.csv
-          git commit -m "Planilha atualizada pela IA [Automático]" || exit 0
+          git commit -m "Planilha updated pela IA [Automático]" || exit 0
           git push
