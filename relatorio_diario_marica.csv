@@ -1,6 +1,2 @@
-Data_Auditoria,Contrato_N,Fornecedor,Valor_RS,Objeto_Completo,Analise_Critica_IA
-20/05/2026,214/2025,Aliança Comercial de Alimentos Eireli,"1.890.000,00",Fornecimento de gêneros alimentícios e insumos para atendimento ao programa de alimentação escolar da rede municipal de Maricá.,"O valor de R$ 1.890.000,00 não é incoerente para o objeto, dada a abrangência do programa de alimentação escolar de uma rede municipal.
-O principal risco de auditoria é o superfaturamento, seja por preços unitários elevados ou pela entrega de quantidades/qualidade inferiores aos contratados."
-20/05/2026,032/2025,Infrasane Saneamento e Construções Ltda,"5.450.000,00",Prestação de serviços contínuos de manutenção preventiva e corretiva das redes de águas pluviais e pavimentação de vias públicas no município.,"Sim, o valor pode ser coerente para serviços contínuos e abrangentes de manutenção municipal.
-
-O principal risco de auditoria é a dificuldade de fiscalização e comprovação da efetiva execução e qualidade de todos os serviços contratados, levando a pagamentos por obras não realizadas ou superfaturadas."
+Data_Auditoria,Contrato_N,Fornecedor,Valor_RS,Analise_IA,Status_Checagem
+20/05/2026,NENHUM NOVO,Nenhum detectado,0,Base checada sem novos registros de contratos públicos para Maricá neste período.,Sem Novidades
