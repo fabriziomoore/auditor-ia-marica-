@@ -1,7 +1,5 @@
-Data_Verificacao,Contrato,Fornecedor,Valor,Analise_IA
-20/05/2026,045/2026,Inova Tech Soluções em Informática Ltda,"480.000,00","O custo de R$ 800,00/notebook/mês é substancialmente elevado para locação de i5 por 12 meses. Há sério risco de **sobrepreço** e inobservância do princípio da economicidade, com potencial dano ao erário público."
-20/05/2026,089/2026,Construtora Pavimentar Rio Eireli,"3.200.000,00","Não, o valor é desproporcionalmente elevado para obras emergenciais de tapa-buraco em apenas 3 ruas.
+Data_Auditoria,Contrato_Nº,Fornecedor,Valor_R$,Objeto_Completo,Analise_Critica_IA
+20/05/2026,214/2025,Aliança Comercial de Alimentos Eireli,"1.890.000,00",Fornecimento de gêneros alimentícios e insumos para atendimento ao programa de alimentação escolar da rede municipal de Maricá.,"O valor de R$ 1.890.000,00 é expressivo. A coerência não pode ser plenamente aferida sem detalhes como período e quantidade de alunos atendidos. O principal risco de auditoria é o sobrepreço na aquisição ou a falta de economicidade do contrato."
+20/05/2026,032/2025,Infrasane Saneamento e Construções Ltda,"5.450.000,00",Prestação de serviços contínuos de manutenção preventiva e corretiva das redes de águas pluviais e pavimentação de vias públicas no município.,"Sim, o valor pode ser coerente para um serviço contínuo e abrangente.
 
-**Risco:** Alto risco de sobrepreço e possível direcionamento de recursos, agravado pela dispensa de licitação usual em contratos emergenciais.
-
-(Sugere-se auditoria detalhada, incluindo pesquisa de preços e avaliação da real necessidade da emergência)."
+O principal risco é a dificuldade de fiscalização e comprovação da efetiva execução e quantidade dos serviços de manutenção, potencializando o superfaturamento ou a inexecução contratual."
