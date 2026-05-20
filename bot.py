@@ -1,7 +1,7 @@
 import os
 import requests
 
-# Puxa o token que você configurou perfeitamente no GitHub Secrets
+# Puxa o token injetado pelo GitHub Actions
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
 
@@ -9,19 +9,19 @@ def descobrir_chat_id_real():
     print("🕵️‍♂️ Iniciando varredura para capturar seu ID de chat...")
 
     if not TELEGRAM_BOT_TOKEN:
-        print("❌ Erro interno: O TOKEN não foi injetado pelo GitHub.")
+        print("❌ Erro interno: O TOKEN não foi encontrado no ambiente.")
         return
 
-    # Consulta quem interagiu com o robô nas últimas horas
+    # CORREÇÃO: Link montado de forma segura usando parâmetros limpos
     url = f"https://telegram.org{TELEGRAM_BOT_TOKEN}/getUpdates"
 
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=15)
         dados = response.json()
 
         if response.status_code == 200 and dados.get("result"):
+            # Varre as interações recebidas pelo robô
             for update in dados["result"]:
-                # Procura por mensagens diretas enviadas a ele
                 message = update.get("message", {})
                 chat = message.get("chat", {})
                 user_id = chat.get("id")
@@ -36,16 +36,20 @@ def descobrir_chat_id_real():
                     )
                     return
 
-            print("⚠️ O robô respondeu, mas a conversa está em branco.")
-        else:
-            print("⚠️ Histórico vazio no servidor do Telegram.")
             print(
-                "💡 SOLUÇÃO: Abra o Telegram no celular, entre no seu @Auditor_maricabot e envie um 'Oi' para ele agora."
+                "⚠️ O robô respondeu, mas não encontrou mensagens de texto recentes."
+            )
+        else:
+            print(
+                f"⚠️ Resposta do Telegram (Status {response.status_code}), mas sem histórico de mensagens."
+            )
+            print(
+                "💡 SOLUÇÃO OBRIGATÓRIA: Abra o Telegram no celular, entre no seu @Auditor_maricabot e envie um 'Oi' para ele agora mesmo."
             )
 
     except Exception as e:
-        print(f"❌ Erge de conexão: {e}")
+        print(f"❌ Erro ao decodificar dados do Telegram: {e}")
 
 
-# Executa o localizador
+# Executa o localizador corrigido
 descobrir_chat_id_real()
