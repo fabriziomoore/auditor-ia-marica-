@@ -1,4 +1,4 @@
-Data_Auditoria,Contrato_N,Fornecedor,Valor_RS,Objeto_Completo,Analise_Critica_IA
-20/05/2026,214/2025,Aliança Comercial de Alimentos Eireli,"1.890.000,00",Fornecimento de gêneros alimentícios e insumos para atendimento ao programa de alimentação escolar da rede municipal de Maricá.,"Sem dados como duração do contrato e número de alunos atendidos, não é possível aferir a coerência do valor. O principal risco de auditoria é o sobrepreço, exigindo a análise detalhada dos preços unitários e quantidades em comparação com referências de mercado."
-20/05/2026,032/2025,Infrasane Saneamento e Construções Ltda,"5.450.000,00",Prestação de serviços contínuos de manutenção preventiva e corretiva das redes de águas pluviais e pavimentação de vias públicas no município.,"O valor pode ser coerente para serviços contínuos e de ampla abrangência em um município como Maricá.
-O principal risco de auditoria é o superfaturamento, devido à dificuldade na fiscalização da efetiva execução e medição precisa dos serviços preventivos e corretivos."
+Data,Contrato_N,Fornecedor,Valor_RS,Analise_IA
+20/05/2026,214/2025,Aliança Comercial de Alimentos Eireli,"1.890.000,00","O valor de R$ 1.890.000,00 não permite análise de razoabilidade sem o detalhamento do número de alunos, período e escopo do fornecimento.
+O risco central é de superfaturamento ou ineficiência na alocação de recursos, exigindo a verificação de custos unitários e comparação com preços de mercado para o volume contratado."
+20/05/2026,032/2025,Infrasane Saneamento e Construções Ltda,"5.450.000,00","R$ 5,45 milhões é um valor substancial. Embora a natureza dos serviços possa justificá-lo, a materialidade exige rigorosa análise de escopo, custos e concorrência para mitigar riscos de sobrepreço e ineficiência."
