@@ -8,6 +8,8 @@ on:
 jobs:
   rodar-ia:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Garante via codigo a permissao de salvar o arquivo
     steps:
       - name: Baixar o codigo do repositorio
         uses: actions/checkout@v4
@@ -15,7 +17,7 @@ jobs:
       - name: Configurar o ambiente Python
         uses: actions/setup-python@v5
         with:
-          python-python: '3.11'
+          python-version: '3.11' # Corrigido aqui de python-python para python-version
 
       - name: Instalar ferramentas necessarias
         run: pip install google-genai pandas requests
