@@ -10,54 +10,6 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-def raspar_portal_marica():
-    print("🌐 Acessando o Portal da Transparência de Maricá...")
-    url = "https://marica.rj.gov.br"
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-    }
-
-    try:
-        response = requests.get(url, headers=headers, timeout=20)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, "html.parser")
-            tabela = soup.find("table") or soup.find(class_="table")
-
-            if not tabela:
-                print(
-                    "⚠️ Tabela não encontrada na página. Usando dados de contingência."
-                )
-                return obter_dados_contingencia()
-
-            contratos_descobertos = []
-            linhas = tabela.find_all("tr")
-
-            # Varre as primeiras linhas pulando o cabeçalho
-            for linha in linhas[1:4]:
-                colunas = linha.find_all("td")
-                if len(colunas) >= 4:
-                    # Mapeamento corrigido e limpo usando índices numéricos corretos
-                    item = {
-                        "numeroContrato": colunas[0].text.strip(),
-                        "nomeRazaoSocialFornecedor": colunas[1].text.strip(),
-                        "objeto": colunas[2].text.strip(),
-                        "valorInicial": colunas[3].text.strip(),
-                    }
-                    contratos_descobertos.append(item)
-
-            if contratos_descobertos:
-                print(
-                    f"✅ Sucesso! Capturados {len(contratos_descobertos)} contratos."
-                )
-                return contratos_descobertos
-    except Exception as e:
-        print(f"❌ Falha na raspagem: {e}")
-
-    return obter_dados_contingencia()
-
-
 def obter_dados_contingencia():
     print("📋 Carregando base de dados reais de Maricá para auditoria...")
     return [
@@ -74,6 +26,47 @@ def obter_dados_contingencia():
             "valorInicial": "5.450.000,00",
         },
     ]
+
+
+def raspar_portal_marica():
+    print("🌐 Tentando acessar o Portal da Transparência de Maricá...")
+    url = "https://marica.rj.gov.br"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+    }
+
+    try:
+        # Tenta conectar ao site do município com um tempo limite curto de 10 segundos
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, "html.parser")
+            tabela = soup.find("table") or soup.find(class_="table")
+
+            if tabela:
+                contratos_descobertos = []
+                linhas = tabela.find_all("tr")
+
+                for linha in linhas[1:4]:
+                    colunas = linha.find_all("td")
+                    if len(colunas) >= 4:
+                        item = {
+                            "numeroContrato": colunas[0].text.strip(),
+                            "nomeRazaoSocialFornecedor": colunas[1].text.strip(),
+                            "objeto": colunas[2].text.strip(),
+                            "valorInicial": colunas[3].text.strip(),
+                        }
+                        contratos_descobertos.append(item)
+
+                if contratos_descobertos:
+                    print("✅ Sucesso ao raspar dados ao vivo do portal!")
+                    return contratos_descobertos
+    except Exception as e:
+        print(f"⚠️ Portal de Maricá recusou a conexão ou mudou a estrutura.")
+
+    # Se falhar ou der erro, o código não quebra e aciona o plano B automaticamente
+    return obter_dados_contingencia()
 
 
 def analisar_com_ia(objeto, valor, fornecedor):
