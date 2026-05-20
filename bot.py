@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from google import genai
 
-# Configuração das chaves de IA puxando do segredo do GitHub
+# Configuração da API do Gemini puxando dos segredos do GitHub
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -27,18 +27,18 @@ def raspar_portal_marica():
 
             if not tabela:
                 print(
-                    "⚠️ Tabela não encontrada na página. Ativando dados de contingência reais."
+                    "⚠️ Tabela não encontrada na página. Usando dados de contingência."
                 )
                 return obter_dados_contingencia()
 
             contratos_descobertos = []
             linhas = tabela.find_all("tr")
 
-            # Varre as primeiras linhas de dados da tabela (pulando o cabeçalho)
+            # Varre as primeiras linhas pulando o cabeçalho
             for linha in linhas[1:4]:
                 colunas = linha.find_all("td")
-                # CORREÇÃO: Garante que existem colunas e extrai usando os índices corretos [0, 1, 2, 3]
                 if len(colunas) >= 4:
+                    # Mapeamento corrigido e limpo usando índices numéricos corretos
                     item = {
                         "numeroContrato": colunas[0].text.strip(),
                         "nomeRazaoSocialFornecedor": colunas[1].text.strip(),
@@ -49,7 +49,7 @@ def raspar_portal_marica():
 
             if contratos_descobertos:
                 print(
-                    f"✅ Sucesso! Capturados {len(contratos_descobertos)} contratos do portal."
+                    f"✅ Sucesso! Capturados {len(contratos_descobertos)} contratos."
                 )
                 return contratos_descobertos
     except Exception as e:
