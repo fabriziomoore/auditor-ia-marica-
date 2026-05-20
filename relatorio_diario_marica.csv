@@ -1,5 +1,7 @@
 Data_Verificacao,Contrato,Fornecedor,Valor,Analise_IA
-20/05/2026,045/2026,Inova Tech Soluções em Informática Ltda,"480.000,00","Não condiz. O custo de R$ 800,00/notebook/mês é excessivamente alto para locação de 50 unidades i5 por 12 meses, superando significativamente preços de mercado.
-O risco principal é de **sobrepreço** e dano ao erário."
-20/05/2026,089/2026,Construtora Pavimentar Rio Eireli,"3.200.000,00","**Não condiz**, a princípio. R$ 3,2 milhões para 'tapa-buraco' em apenas 3 ruas parece um valor excessivo para a descrição.
-O risco principal é de **superfaturamento**, com potencial dano ao erário, exigindo análise detalhada da composição de custos unitários e justificativa da emergência."
+20/05/2026,045/2026,Inova Tech Soluções em Informática Ltda,"480.000,00","O custo de R$ 800,00/notebook/mês é substancialmente elevado para locação de i5 por 12 meses. Há sério risco de **sobrepreço** e inobservância do princípio da economicidade, com potencial dano ao erário público."
+20/05/2026,089/2026,Construtora Pavimentar Rio Eireli,"3.200.000,00","Não, o valor é desproporcionalmente elevado para obras emergenciais de tapa-buraco em apenas 3 ruas.
+
+**Risco:** Alto risco de sobrepreço e possível direcionamento de recursos, agravado pela dispensa de licitação usual em contratos emergenciais.
+
+(Sugere-se auditoria detalhada, incluindo pesquisa de preços e avaliação da real necessidade da emergência)."
