@@ -29,57 +29,49 @@ def enviar_alerta_telegram(mensagem):
 
 def buscar_contratos_pncp_reais():
     print("🔄 Conectando ao banco de dados nacional do PNCP...")
-
-    # CNPJ Oficial da Prefeitura de Maricá
     CNPJ_MARICA = "29131075000193"
-
-    # Buscando o ano consolidado de 2024 para auditar dados verídicos e homologados
+    
+    # Mantendo o ano consolidado de 2024 para capturar dados homologados
     ano_busca = 2024
-
-    url = f"https://pncp.gov.br{CNPJ_MARICA}/contratos/{ano_busca}"
+    
+    url = f"https://pncp.gov.br/api/consulta/v1/orgaos/{CNPJ_MARICA}/contratos/{ano_busca}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
 
     try:
         response = requests.get(url, params={"pagina": 1}, headers=headers, timeout=20)
-
+        
         if response.status_code != 200:
-            raise Exception(
-                f"Servidor Federal instável. Status: {response.status_code}"
-            )
-
+            raise Exception(f"Servidor Federal recusou a requisição. Código: {response.status_code}")
+            
         dados = response.json()
-        # Captura os contratos reais validados de dentro da resposta da API
-        contratos_api = dados.get("resultado", dados.get("data", []))
+        
+        # CORREÇÃO: Varre as duas palavras-chave usadas pelo governo para garantir a captura
+        contratos_api = []
+        if isinstance(dados, dict):
+            contratos_api = dados.get("data", dados.get("resultado", []))
+        elif isinstance(dados, list):
+            contratos_api = dados
 
         if not contratos_api:
-            raise Exception(
-                f"Conexão realizada, mas nenhum contrato foi retornado para o ano {ano_busca}."
-            )
+            raise Exception(f"A API do governo respondeu com sucesso, mas a lista de contratos de Maricá para {ano_busca} retornou vazia.")
 
         contratos_limpos = []
-        # Seleciona apenas os 2 primeiros contratos de Maricá para auditar via IA
+        # Captura os 2 primeiros contratos verídicos retornados pelo Governo Federal
         for c in contratos_api[:2]:
-            item = {
-                "numeroContrato": c.get("numeroContrato", "S/N"),
-                "nomeRazaoSocialFornecedor": c.get(
-                    "nomeRazaoSocialFornecedor", "Não informado"
-                ),
-                "objeto": c.get("objeto", "Não informado"),
-                "valorInicial": f"{c.get('valorInicial', 0):,.2f}".replace(
-                    ",", "v"
-                )
-                .replace(".", ",")
-                .replace("v", "."),
-            }
-            contratos_limpos.append(item)
-
-        print(f"✅ Sucesso! {len(contratos_limpos)} contratos reais importados.")
+            contratos_limpos.append({
+                "numeroContrato": str(c.get("numeroContrato", "S/N")),
+                "nomeRazaoSocialFornecedor": str(c.get("nomeRazaoSocialFornecedor", "Não informado")),
+                "objeto": str(c.get("objeto", "Não informado")),
+                "valorInicial": str(c.get("valorInicial", "0"))
+            })
+            
+        print(f"✅ Sucesso absoluto! {len(contratos_limpos)} contratos reais importados.")
         return contratos_limpos
 
     except Exception as e:
-        erro_msg = f"❌ *FALHA DE CONEXÃO REAL*\nNão foi possível obter dados do PNCP.\n\n*Motivo:* {str(e)}"
+        erro_msg = f"❌ *FALHA DE CONEXÃO REAL*\nNão foi possível obter dados oficiais.\n\n*Motivo técnico:* {str(e)}"
         print(erro_msg)
         enviar_alerta_telegram(erro_msg)
         raise e
@@ -91,7 +83,7 @@ try:
     resultados = []
 
     enviar_alerta_telegram(
-        "🔍 *AUDITOR IA MARICÁ*\nDados oficiais recuperados. Iniciando análise crítica..."
+        "🔍 *AUDITOR IA MARICÁ*\nConexão com a base federal estabelecida. Analisando contratos reais de Maricá..."
     )
 
     for c in contratos:
@@ -104,12 +96,12 @@ try:
 
         prompt = f"""
         Você é um auditor fiscal especialista em contas municipais.
-        Analise de forma extremamente crítica os dados deste contrato REAL da prefeitura de Maricá:
+        Analise de forma crítica os dados deste contrato real extraído da prefeitura de Maricá:
         - Fornecedor: {fornecedor}
         - Objeto do Contrato: {objeto}
         - Valor Cadastrado: R$ {valor}
 
-        Responda em até 3 linhas se há coerência aparente no valor e aponte o principal risco de auditoria.
+        Responda em até 3 linhas se há coerência no valor e aponte o principal risco de auditoria.
         """
 
         try:
@@ -118,7 +110,7 @@ try:
             )
             analise = response.text.strip()
         except Exception as e:
-            analise = f"Limitação temporária na API da IA: {str(e)}"
+            analise = f"Falha na API da IA: {str(e)}"
 
         texto_card = (
             f"📄 *Contrato nº:* {numero}\n"
@@ -138,12 +130,13 @@ try:
                 "Analise_IA": analise,
             }
         )
+        
+        # Pausa de cota inteligente para o plano do Gemini
         time.sleep(5)
 
-    # Gravação física do arquivo no repositório público
     df_final = pd.DataFrame(resultados)
     df_final.to_csv("relatorio_diario_marica.csv", index=False, encoding="utf-8")
     print("🏆 Planilha gerada com dados 100% verídicos da base federal!")
 
 except Exception as erro_geral:
-    print(f"Execução encerrada para proteção do histórico: {erro_geral}")
+    print(f"Execução interrompida para evitar contaminação do relatório: {erro_geral}")
