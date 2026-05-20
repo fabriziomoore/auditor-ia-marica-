@@ -18,7 +18,7 @@ def enviar_alerta_telegram(mensagem):
     url = f"https://telegram.org{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
-        "text": mensagem,
+        "text": message,
         "parse_mode": "Markdown",
     }
     try:
@@ -27,70 +27,85 @@ def enviar_alerta_telegram(mensagem):
         pass
 
 
-def buscar_contratos_reais_marica():
-    print("🔄 Conectando ao endpoint geral do PNCP...")
-    
-    # Endpoint público de listagem geral por data de publicação
+def buscar_contratos_pncp_reais():
+    print("🔄 Conectando ao banco de dados nacional do PNCP...")
+
+    # Utiliza o endpoint de busca pública do PNCP baseado em paginação obrigatória
     url = "https://pncp.gov.br/api/consulta/v1/contratos"
-    
-    # Define um intervalo de busca recente baseado no histórico verídico
+
+    # Define o intervalo com formatação padrão exigida pela documentação técnica (AAAA-MM-DD)
     params = {
-        "dataInicial": "20250101",
-        "dataFinal": "20250110",
-        "pagina": 1
+        "dataInicial": "2025-01-01",
+        "dataFinal": "2025-01-30",
+        "pagina": 1,
+        "tamanhoPagina": 10,
     }
-    
+
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
     }
 
     try:
         response = requests.get(url, params=params, headers=headers, timeout=25)
-        
+
         if response.status_code != 200:
-            raise Exception(f"Erro na API Federal do PNCP. Código: {response.status_code}")
-            
+            raise Exception(
+                f"Erro na API Federal do PNCP. Status: {response.status_code}"
+            )
+
         dados = response.json()
-        itens_contrato = dados.get("data", dados.get("resultado", []))
+
+        # O Portal Nacional pagina as chaves dentro do objeto 'data'
+        itens_contrato = dados.get("data", [])
 
         contratos_filtrados = []
-        
-        # Filtra na listagem nacional apenas o que pertence ao município de Maricá
+
         for c in itens_contrato:
+            # Captura a identificação do órgão de forma aninhada
             orgao = c.get("orgaoEntidade", {})
-            nome_orgao = orgao.get("razaoSocial", "").upper()
-            objeto_texto = c.get("objeto", "").upper()
-            
-            if "MARICA" in nome_orgao or "MARICÁ" in nome_orgao:
-                contratos_filtrados.append({
-                    "numeroContrato": str(c.get("numeroContrato", "S/N")),
-                    "nomeRazaoSocialFornecedor": str(c.get("nomeRazaoSocialFornecedor", "Não informado")),
-                    "objeto": str(c.get("objeto", "Não informado")),
-                    "valorInicial": str(c.get("valorInicial", "0"))
-                })
-                
-        # Caso a busca por data estrita retorne zerada devido ao balanceamento da API federal, 
-        # o script avisa no Telegram o status real em vez de gerar dados fictícios.
+            razao_social = orgao.get("razaoSocial", "").upper()
+            municipio = c.get("municipio", {}).get("nome", "").upper()
+
+            # Filtra de forma estrita para garantir o retorno de dados reais da cidade
+            if (
+                "MARICA" in razao_social
+                or "MARICÁ" in razao_social
+                or "MARICA" in municipio
+            ):
+                contratos_filtrados.append(
+                    {
+                        "numeroContrato": str(c.get("numeroContrato", "S/N")),
+                        "nomeRazaoSocialFornecedor": str(
+                            c.get("nomeRazaoSocialFornecedor", "Não informado")
+                        ),
+                        "objeto": str(c.get("objeto", "Não informado")),
+                        "valorInicial": str(c.get("valorInicial", "0")),
+                    }
+                )
+
         if not contratos_filtrados:
-            raise Exception("Nenhum contrato ativo foi retornado pela API federal na janela de checagem atual.")
+            raise Exception(
+                "A busca foi executada, mas não há registros no intervalo selecionado para os parâmetros de filtro adotados."
+            )
 
         print(f"✅ {len(contratos_filtrados)} contratos reais localizados!")
-        return contratos_filtrados[:2] # Limita a 2 itens para evitar travamento de cota
+        return contratos_filtrados[:2]
 
     except Exception as e:
-        erro_msg = f"⚠️ *STATUS DO MONITORAMENTO*\nA API federal conectou com sucesso.\n\n*Informação técnica:* {str(e)}"
+        erro_msg = f"❌ *INFORMAÇÃO DE MONITORAMENTO*\nConexão com a base federal concluída.\n\n*Status real:* {str(e)}"
         print(erro_msg)
         enviar_alerta_telegram(erro_msg)
         raise e
 
 
-# --- EXECUÇÃO DO PROCESSO 100% AUDITÁVEL ---
+# --- EXECUÇÃO DO PROCESSO 100% REAL ---
 try:
-    contratos = buscar_contratos_reais_marica()
+    contratos = buscar_contratos_pncp_reais()
     resultados = []
 
     enviar_alerta_telegram(
-        "🔍 *AUDITOR IA MARICÁ*\nContratos identificados na base nacional. Processando auditoria fiscal..."
+        "🔍 *AUDITOR IA MARICÁ*\nDados oficiais recuperados. Iniciando análise crítica..."
     )
 
     for c in contratos:
@@ -124,13 +139,15 @@ try:
 
         enviar_alerta_telegram(texto_card)
 
-        resultados.append({
-            "Data_Auditoria": datetime.date.today().strftime("%d/%m/%Y"),
-            "Contrato_N": numero,
-            "Fornecedor": fornecedor,
-            "Valor_RS": valor,
-            "Analise_IA": analise,
-        })
+        resultados.append(
+            {
+                "Data_Auditoria": datetime.date.today().strftime("%d/%m/%Y"),
+                "Contrato_N": numero,
+                "Fornecedor": fornecedor,
+                "Valor_RS": valor,
+                "Analise_IA": analise,
+            }
+        )
         time.sleep(5)
 
     df_final = pd.DataFrame(resultados)
