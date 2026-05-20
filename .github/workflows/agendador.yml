@@ -9,9 +9,7 @@ jobs:
   rodar-ia:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Permissao para salvar o arquivo de volta no repositorio
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Força o uso do Node24 e elimina o aviso amarelo
+      contents: write # Garante a permissao para salvar arquivos no repositorio
     steps:
       - name: Baixar o codigo do repositorio
         uses: actions/checkout@v4
@@ -22,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Instalar ferramentas necessarias
-        run: pip install google-genai pandas requests
+        run: pip install google-genai pandas requests beautifulsoup4
 
       - name: Executar o script do Auditor IA
         env:
@@ -33,6 +31,6 @@ jobs:
         run: |
           git config --global user.name "Auditor Robot"
           git config --global user.email "bot@github.com"
-          git add relatorio_diario_marica.csv
-          git commit -m "Planilha updated pela IA [Automático]" || exit 0
+          git add -A
+          git commit -m "Planilha automatica atualizada [Automático]" || exit 0
           git push
